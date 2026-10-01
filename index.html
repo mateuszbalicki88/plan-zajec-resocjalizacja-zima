@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Plan zajęć - licznik</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f6f8;
+    color: #1f2937;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 25px 18px 50px;
+}
+
+h1 {
+    margin: 0 0 6px;
+    font-size: 32px;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin-bottom: 25px;
+}
+
+.clock {
+    background: white;
+    padding: 18px;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.clock strong {
+    font-size: 20px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 25px;
+}
+
+.stat {
+    background: white;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.stat-title {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 27px;
+    font-weight: bold;
+}
+
+.section {
+    background: white;
+    padding: 22px;
+    border-radius: 14px;
+    margin-bottom: 22px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.section h2 {
+    margin-top: 0;
+}
+
+.progress {
+    height: 12px;
+    background: #e5e7eb;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    background: #2563eb;
+    border-radius: 20px;
+    transition: width 0.5s;
+}
+
+.subject {
+    margin-bottom: 22px;
+}
+
+.subject:last-child {
+    margin-bottom: 0;
+}
+
+.subject-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.subject-name {
+    font-weight: bold;
+}
+
+.subject-hours {
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.week-info {
+    background: #f8fafc;
+    border-left: 5px solid #2563eb;
+    padding: 14px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.week-day {
+    margin-top: 18px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #e5e7eb;
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.next-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.next-item:last-child {
+    border-bottom: none;
+}
+
+.next-time {
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.schedule-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 110px;
+    gap: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.schedule-row:last-child {
+    border-bottom: none;
+}
+
+.schedule-date {
+    font-weight: bold;
+}
+
+.schedule-time {
+    color: #6b7280;
+}
+
+.schedule-status {
+    text-align: right;
+}
+
+.done {
+    color: #16a34a;
+    font-weight: bold;
+}
+
+.upcoming {
+    color: #2563eb;
+    font-weight: bold;
+}
+
+.today {
+    color: #d97706;
+    font-weight: bold;
+}
+
+.empty {
+    color: #6b7280;
+    padding: 10px 0;
+}
+
+@media (max-width: 800px) {
+
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+@media (max-width: 550px) {
+
+    h1 {
+        font-size: 25px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .stat-value {
+        font-size: 22px;
+    }
+
+    .schedule-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .schedule-status {
+        text-align: left;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>📚 Mój plan zajęć</h1>
+
+    <div class="subtitle">
+        Semestr zimowy 2026/2027 • bez seminarium magisterskiego
+    </div>
+
+    <div class="clock">
+        Aktualna data i godzina:
+        <strong id="currentDateTime">—</strong>
+    </div>
+
+
+    <div class="stats">
+
+        <div class="stat">
+            <div class="stat-title">
+                Wszystkich godzin
+            </div>
+
+            <div class="stat-value" id="totalHours">
+                —
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-title">
+                Ukończonych
+            </div>
+
+            <div class="stat-value" id="completedHours">
+                —
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-title">
+                Pozostało
+            </div>
+
+            <div class="stat-value" id="remainingHours">
+                —
+            </div>
+        </div>
+
+
+        <div class="stat">
+            <div class="stat-title">
+                % pozostało
+            </div>
+
+            <div class="stat-value" id="remainingPercent">
+                —
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="section">
+
+        <h2>📊 Cały plan</h2>
+
+        <div id="overallText"></div>
+
+        <div class="progress">
+            <div
+                class="progress-bar"
+                id="overallProgress">
+            </div>
+        </div>
+
+        <div id="overallPercent"></div>
+
+    </div>
+
+
+    <div class="section">
+
+        <h2>📅 Nadchodzący tydzień</h2>
+
+        <div class="week-info" id="weekInfo"></div>
+
+        <div id="nextWeek"></div>
+
+    </div>
+
+
+    <div class="section">
+
+        <h2>📖 Przedmioty</h2>
+
+        <div id="subjects"></div>
+
+    </div>
+
+
+    <div class="section">
+
+        <h2>🗓️ Cały harmonogram</h2>
+
+        <div id="schedule"></div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ============================================================
+   PLAN ZAJĘĆ
+   Źródło: plan z pliku kalendarza
+   Seminarium magisterskie zostało usunięte.
+   ============================================================ */
+
+const classes = [
+
+    /* 03.10.2026 */
+
+    ["2026-10-03","15:00","16:30","Wybrane zagadnienia psychologii wychowawczej"],
+    ["2026-10-03","16:45","18:15","Pedagogika resocjalizacyjna"],
+
+
+    /* 10.10.2026 */
+
+    ["2026-10-10","08:45","09:30","Dialog edukacyjny"],
+    ["2026-10-10","09:45","11:15","Dialog edukacyjny"],
+    ["2026-10-10","11:30","13:00","Psychologia konfliktu i kryzysu"],
+    ["2026-10-10","13:15","14:45","Psychologia konfliktu i kryzysu"],
+    ["2026-10-10","15:00","16:30","Pedagogika resocjalizacyjna"],
+    ["2026-10-10","16:45","18:15","Pedagogika resocjalizacyjna"],
+
+
+    /* 17.10.2026 */
+
+    ["2026-10-17","11:30","13:00","Socjoterapia w resocjalizacji"],
+    ["2026-10-17","13:15","14:45","Metodyka pracy w interwencji kryzysowej"],
+    ["2026-10-17","15:00","16:30","Metodyka pracy w interwencji kryzysowej"],
+
+
+    /* 24.10.2026 */
+
+    ["2026-10-24","08:45","09:30","Dialog edukacyjny"],
+    ["2026-10-24","09:45","11:15","Dialog edukacyjny"],
+    ["2026-10-24","11:30","13:00","Psychologia konfliktu i kryzysu"],
+    ["2026-10-24","13:15","14:45","Psychologia konfliktu i kryzysu"],
+    ["2026-10-24","15:00","16:30","Pedagogika resocjalizacyjna"],
+    ["2026-10-24","16:45","18:15","Pedagogika resocjalizacyjna"],
+
+
+    /* 31.10.2026 */
+
+    ["2026-10-31","10:30","11:15","Pedagogika resocjalizacyjna"],
+    ["2026-10-31","11:30","13:00","Pedagogika resocjalizacyjna"],
+    ["2026-10-31","13:15","14:45","Pedagogika resocjalizacyjna"],
+    ["2026-10-31","15:00","16:30","Wybrane zagadnienia psychologii wychowawczej"],
+    ["2026-10-31","16:45","18:15","Wybrane zagadnienia psychologii wychowawczej"],
+    ["2026-10-31","18:30","20:00","Wybrane zagadnienia psychologii wychowawczej"],
+
+
+    /* 07.11.2026 */
+
+    ["2026-11-07","11:30","13:00","Psychologia konfliktu i kryzysu"],
+    ["2026-11-07","13:15","14:45","Psychologia konfliktu i kryzysu"],
+    ["2026-11-07","15:00","15:45","Pedagogika resocjalizacyjna"],
+
+
+    /* 14.11.2026 */
+
+    ["2026-11-14","08:45","09:30","Dialog edukacyjny"],
+    ["2026-11-14","09:45","11:15","Dialog edukacyjny"],
+    ["2026-11-14","11:30","13:00","Socjoterapia w resocjalizacji"],
+    ["2026-11-14","13:15","14:45","Metodyka pracy w interwencji kryzysowej"],
+
+
+    /* 21.11.2026 */
+
+    ["2026-11-21","11:30","13:00","Psychologia konfliktu i kryzysu"],
+    ["2026-11-21","13:15","14:00","Psychologia konfliktu i kryzysu"],
+    ["2026-11-21","15:00","16:30","Socjoterapia w resocjalizacji"],
+    ["2026-11-21","16:45","18:15","Metodyka pracy w interwencji kryzysowej"],
+    ["2026-11-21","18:30","20:00","Metodyka pracy w interwencji kryzysowej"],
+
+
+    /* 28.11.2026 */
+
+    ["2026-11-28","08:45","09:30","Dialog edukacyjny"],
+    ["2026-11-28","09:45","11:15","Dialog edukacyjny"],
+    ["2026-11-28","11:30","13:00","Socjoterapia w resocjalizacji"],
+    ["2026-11-28","13:15","14:45","Socjoterapia w resocjalizacji"],
+    ["2026-11-28","15:00","16:30","Metodyka pracy w interwencji kryzysowej"],
+    ["2026-11-28","16:45","18:15","Metodyka pracy w interwencji kryzysowej"],
+
+
+    /* 05.12.2026 */
+
+    /* Seminarium było tutaj i zostało usunięte. */
+
+
+    /* 12.12.2026 */
+
+    ["2026-12-12","08:45","09:30","Dialog edukacyjny"],
+    ["2026-12-12","09:45","11:15","Dialog edukacyjny"],
+    ["2026-12-12","11:30","13:00","Socjoterapia w resocjalizacji"],
+    ["2026-12-12","13:15","14:45","Socjoterapia w resocjalizacji"],
+    ["2026-12-12","15:00","16:30","Metodyka pracy w interwencji kryzysowej"],
+    ["2026-12-12","16:45","18:15","Metodyka pracy w interwencji kryzysowej"],
+
+
+    /* 19.12.2026 */
+
+    ["2026-12-19","08:00","09:30","Wybrane zagadnienia psychologii wychowawczej"],
+    ["2026-12-19","09:45","11:15","Wybrane zagadnienia psychologii wychowawczej"],
+    ["2026-12-19","13:15","14:45","Pedagogika resocjalizacyjna"],
+
+
+    /* 09.01.2027 */
+
+    ["2027-01-09","15:00","16:30","Wybrane zagadnienia psychologii wychowawczej"],
+    ["2027-01-09","16:45","18:15","Wybrane zagadnienia psychologii wychowawczej"],
+    ["2027-01-09","18:30","20:00","Wybrane zagadnienia psychologii wychowawczej"],
+
+
+    /* 16.01.2027 */
+
+    ["2027-01-16","11:30","13:00","Socjoterapia w resocjalizacji"],
+    ["2027-01-16","13:15","14:45","Metodyka pracy w interwencji kryzysowej"],
+
+
+    /* 23.01.2027 */
+
+    ["2027-01-23","11:30","13:00","Socjoterapia w resocjalizacji"],
+    ["2027-01-23","13:15","14:45","Metodyka pracy w interwencji kryzysowej"],
+    ["2027-01-23","15:00","16:30","Metodyka pracy w interwencji kryzysowej"],
+    ["2027-01-23","16:45","18:15","Metodyka pracy w interwencji kryzysowej"],
+
+
+    /* 30.01.2027 */
+
+    ["2027-01-30","11:30","13:00","Metodyka pracy w interwencji kryzysowej"],
+    ["2027-01-30","13:15","14:45","Metodyka pracy w interwencji kryzysowej"]
+
+];
+
+
+/* ============================================================
+   FUNKCJE
+   ============================================================ */
+
+function makeDate(date, time) {
+    return new Date(`${date}T${time}:00`);
+}
+
+
+function duration(start, end) {
+
+    const a = new Date(`2000-01-01T${start}:00`);
+    const b = new Date(`2000-01-01T${end}:00`);
+
+    return (b - a) / 3600000;
+}
+
+
+function formatHours(hours) {
+
+    return Number.isInteger(hours)
+        ? hours.toString()
+        : hours.toFixed(2)
+            .replace(/0+$/, "")
+            .replace(/\.$/, "");
+}
+
+
+function formatDate(date) {
+
+    return date.toLocaleDateString("pl-PL", {
+        weekday: "long",
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+    });
+}
+
+
+/* ============================================================
+   PRZYGOTOWANIE DANYCH
+   ============================================================ */
+
+const events = classes.map(item => ({
+
+    date: item[0],
+    start: item[1],
+    end: item[2],
+    subject: item[3],
+
+    hours: duration(item[1], item[2])
+
+}));
+
+
+const totalHours = events.reduce(
+    (sum, event) => sum + event.hours,
+    0
+);
+
+
+/* ============================================================
+   NASTĘPNY TYDZIEŃ KALENDARZOWY
+   ============================================================ */
+
+function getNextWeekRange(now) {
+
+    const currentDay = now.getDay();
+
+    /*
+       JavaScript:
+       niedziela = 0
+       poniedziałek = 1
+       ...
+       sobota = 6
+    */
+
+    const daysUntilMonday =
+        currentDay === 0
+            ? 1
+            : 8 - currentDay;
+
+    const monday = new Date(now);
+
+    monday.setHours(0,0,0,0);
+    monday.setDate(
+        now.getDate() + daysUntilMonday
+    );
+
+    const sunday = new Date(monday);
+
+    sunday.setDate(
+        monday.getDate() + 6
+    );
+
+    sunday.setHours(23,59,59,999);
+
+    return {
+        monday,
+        sunday
+    };
+}
+
+
+/* ============================================================
+   GŁÓWNA AKTUALIZACJA
+   ============================================================ */
+
+function updatePage() {
+
+    const now = new Date();
+
+
+    /* AKTUALNA DATA */
+
+    document.getElementById(
+        "currentDateTime"
+    ).textContent = now.toLocaleString(
+        "pl-PL",
+        {
+            weekday: "long",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        }
+    );
+
+
+    /* ZAKOŃCZONE */
+
+    const completedEvents = events.filter(
+        event =>
+            makeDate(event.date, event.end) <= now
+    );
+
+
+    /* POZOSTAŁE */
+
+    const remainingEvents = events.filter(
+        event =>
+            makeDate(event.date, event.end) > now
+    );
+
+
+    const completedHours =
+        completedEvents.reduce(
+            (sum, event) =>
+                sum + event.hours,
+            0
+        );
+
+
+    const remainingHours =
+        totalHours - completedHours;
+
+
+    const completedPercent =
+        totalHours > 0
+            ? (completedHours / totalHours) * 100
+            : 0;
+
+
+    const remainingPercent =
+        100 - completedPercent;
+
+
+    /* ========================================================
+       STATYSTYKI
+       ======================================================== */
+
+    document.getElementById(
+        "totalHours"
+    ).textContent =
+        formatHours(totalHours) + " h";
+
+
+    document.getElementById(
+        "completedHours"
+    ).textContent =
+        formatHours(completedHours) + " h";
+
+
+    document.getElementById(
+        "remainingHours"
+    ).textContent =
+        formatHours(remainingHours) + " h";
+
+
+    document.getElementById(
+        "remainingPercent"
+    ).textContent =
+        remainingPercent.toFixed(2) + "%";
+
+
+    /* ========================================================
+       CAŁY PLAN
+       ======================================================== */
+
+    document.getElementById(
+        "overallText"
+    ).innerHTML = `
+        Ukończono
+        <strong>${formatHours(completedHours)} h</strong>
+        z
+        <strong>${formatHours(totalHours)} h</strong>.
+        Pozostało
+        <strong>${formatHours(remainingHours)} h</strong>.
+    `;
+
+
+    document.getElementById(
+        "overallProgress"
+    ).style.width =
+        Math.min(completedPercent, 100) + "%";
+
+
+    document.getElementById(
+        "overallPercent"
+    ).textContent =
+        completedPercent.toFixed(2) +
+        "% ukończone • " +
+        remainingPercent.toFixed(2) +
+        "% pozostało";
+
+
+    /* ========================================================
+       PRZEDMIOTY
+       ======================================================== */
+
+    const subjectData = {};
+
+
+    events.forEach(event => {
+
+        if (!subjectData[event.subject]) {
+
+            subjectData[event.subject] = {
+                total: 0,
+                completed: 0
+            };
+
+        }
+
+
+        subjectData[event.subject].total +=
+            event.hours;
+
+
+        if (
+            makeDate(event.date, event.end) <= now
+        ) {
+
+            subjectData[event.subject].completed +=
+                event.hours;
+
+        }
+
+    });
+
+
+    const subjectsContainer =
+        document.getElementById("subjects");
+
+    subjectsContainer.innerHTML = "";
+
+
+    Object.entries(subjectData)
+        .sort(
+            (a,b) =>
+                b[1].total - a[1].total
+        )
+        .forEach(
+            ([subject, data]) => {
+
+                const remaining =
+                    data.total -
+                    data.completed;
+
+
+                const percentDone =
+                    data.total > 0
+                        ? (
+                            data.completed /
+                            data.total
+                          ) * 100
+                        : 0;
+
+
+                const percentRemaining =
+                    100 - percentDone;
+
+
+                const div =
+                    document.createElement("div");
+
+
+                div.className = "subject";
+
+
+                div.innerHTML = `
+
+                    <div class="subject-header">
+
+                        <div class="subject-name">
+                            ${subject}
+                        </div>
+
+                        <div class="subject-hours">
+                            ${formatHours(remaining)}
+                            h pozostało
+                        </div>
+
+                    </div>
+
+
+                    <div class="progress">
+
+                        <div
+                            class="progress-bar"
+                            style="width:${percentDone}%"
+                        ></div>
+
+                    </div>
+
+
+                    <div style="
+                        font-size:14px;
+                        color:#6b7280;
+                    ">
+
+                        ${formatHours(data.completed)}
+                        h /
+                        ${formatHours(data.total)}
+                        h ukończone
+
+                        •
+
+                        ${percentRemaining.toFixed(2)}%
+                        pozostało
+
+                    </div>
+
+                `;
+
+
+                subjectsContainer.appendChild(div);
+
+            }
+        );
+
+
+    /* ========================================================
+       NADCHODZĄCY TYDZIEŃ
+       ======================================================== */
+
+    const week =
+        getNextWeekRange(now);
+
+
+    document.getElementById(
+        "weekInfo"
+    ).innerHTML = `
+
+        <strong>
+            ${week.monday.toLocaleDateString("pl-PL")}
+            –
+            ${week.sunday.toLocaleDateString("pl-PL")}
+        </strong>
+
+        <br>
+
+        Zajęcia zaplanowane w następnym
+        tygodniu kalendarzowym.
+
+    `;
+
+
+    const nextWeekEvents =
+        events
+            .filter(event => {
+
+                const start =
+                    makeDate(
+                        event.date,
+                        event.start
+                    );
+
+                return (
+                    start >= week.monday &&
+                    start <= week.sunday
+                );
+
+            })
+            .sort(
+                (a,b) =>
+                    makeDate(a.date,a.start) -
+                    makeDate(b.date,b.start)
+            );
+
+
+    const nextWeekContainer =
+        document.getElementById("nextWeek");
+
+
+    nextWeekContainer.innerHTML = "";
+
+
+    if (nextWeekEvents.length === 0) {
+
+        nextWeekContainer.innerHTML = `
+            <div class="empty">
+                Brak zajęć w następnym tygodniu.
+            </div>
+        `;
+
+    } else {
+
+        let previousDate = "";
+
+
+        nextWeekEvents.forEach(event => {
+
+            if (event.date !== previousDate) {
+
+                const heading =
+                    document.createElement("div");
+
+                heading.className =
+                    "week-day";
+
+                heading.textContent =
+                    formatDate(
+                        makeDate(
+                            event.date,
+                            "12:00"
+                        )
+                    );
+
+                nextWeekContainer.appendChild(
+                    heading
+                );
+
+                previousDate =
+                    event.date;
+            }
+
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "next-item";
+
+
+            item.innerHTML = `
+
+                <strong>
+                    ${event.subject}
+                </strong>
+
+                <div class="next-time">
+
+                    ${event.start}
+                    –
+                    ${event.end}
+
+                    •
+
+                    ${formatHours(event.hours)}
+                    h
+
+                </div>
+
+            `;
+
+
+            nextWeekContainer.appendChild(item);
+
+        });
+
+    }
+
+
+    /* ========================================================
+       CAŁY HARMONOGRAM
+       ======================================================== */
+
+    const scheduleContainer =
+        document.getElementById("schedule");
+
+
+    scheduleContainer.innerHTML = "";
+
+
+    events.forEach(event => {
+
+        const start =
+            makeDate(
+                event.date,
+                event.start
+            );
+
+
+        const end =
+            makeDate(
+                event.date,
+                event.end
+            );
+
+
+        let status;
+        let statusClass;
+
+
+        if (end <= now) {
+
+            status = "✓ zakończone";
+            statusClass = "done";
+
+        }
+
+        else if (
+            start <= now &&
+            end > now
+        ) {
+
+            status = "● TRWA";
+            statusClass = "today";
+
+        }
+
+        else {
+
+            status = "→ nadchodzące";
+            statusClass = "upcoming";
+
+        }
+
+
+        const row =
+            document.createElement("div");
+
+
+        row.className =
+            "schedule-row";
+
+
+        row.innerHTML = `
+
+            <div>
+
+                <div class="schedule-date">
+
+                    ${new Date(
+                        event.date + "T12:00:00"
+                    ).toLocaleDateString(
+                        "pl-PL"
+                    )}
+
+                </div>
+
+                <div class="schedule-time">
+
+                    ${event.start}
+                    –
+                    ${event.end}
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <strong>
+                    ${event.subject}
+                </strong>
+
+                <br>
+
+                <span style="
+                    color:#6b7280;
+                ">
+
+                    ${formatHours(event.hours)}
+                    h
+
+                </span>
+
+            </div>
+
+
+            <div
+                class="schedule-status ${statusClass}"
+            >
+
+                ${status}
+
+            </div>
+
+        `;
+
+
+        scheduleContainer.appendChild(row);
+
+    });
+
+}
+
+
+/* ============================================================
+   URUCHOMIENIE
+   ============================================================ */
+
+updatePage();
+
+
+/*
+   Aktualizacja co sekundę.
+   Dzięki temu data, godzina oraz status
+   zajęć zmieniają się automatycznie.
+*/
+
+setInterval(
+    updatePage,
+    1000
+);
+
+</script>
+
+</body>
+</html>
